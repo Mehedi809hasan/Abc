@@ -1,9 +1,5 @@
 {
-  "version": 2,
-  "routes": [
-    {
-      "src": "/stream",
-      "dest": "/api/stream.js"
-    }
+  "rewrites": [
+    { "source": "/api/stream", "destination": "/api/stream.js" }
   ]
 }
