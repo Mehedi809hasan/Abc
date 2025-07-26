@@ -2,27 +2,24 @@ export default async function handler(req, res) {
   const { channel } = req.query;
 
   if (!channel) {
-    return res.status(400).json({ error: 'Channel is required' });
+    return res.status(400).json({ error: 'Missing channel ID' });
   }
 
-  const mac = '00:1A:79:01:CE:7F'; // আপনার MAC address
-  const baseUrl = 'http://azers.online:80';
-
-  // মূল পোর্টাল ইউআরএল বানানো
-  const originalUrl = `${baseUrl}/play/live.php?mac=${mac}&stream=${channel}&type=m3u8`;
+  const mac = '00:1A:79:01:CE:7F';
+  const portal = 'http://azers.online:80';
+  const url = `${portal}/play/live.php?mac=${mac}&stream=${channel}&type=m3u8`;
 
   try {
-    const streamRes = await fetch(originalUrl);
-    if (!streamRes.ok) {
-      return res.status(500).json({ error: 'Failed to fetch stream' });
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return res.status(500).json({ error: 'Stream fetch failed' });
     }
 
-    // response headers ঠিক রাখা
-    res.setHeader('Content-Type', streamRes.headers.get('Content-Type') || 'application/vnd.apple.mpegurl');
-
-    // ডেটা pipe করে দেওয়া
-    streamRes.body.pipeTo(res);
-  } catch (error) {
-    return res.status(500).json({ error: 'Proxy error', detail: error.message });
+    const body = await response.text(); // Stream নয়, পুরো body টেক্সটে নিন
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.send(body); // res.write বা stream নয়
+  } catch (err) {
+    res.status(500).json({ error: 'Fetch error', details: err.message });
   }
 }
