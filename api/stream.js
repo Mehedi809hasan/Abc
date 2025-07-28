@@ -1,18 +1,13 @@
 export default async function handler(req, res) {
-  const id = req.query.id;
+  const url = `http://line.ultrab.xyz/get.php?username=/ZeeALI1&password=465841&type=m3u&output=mpegts`;
 
-  // ID অনুযায়ী মূল লিংক সেট করুন
-  const streamMap = {
-    "abc123": "http://31.220.3.103:2095/play/live.php?mac=00:1A:79:E7:32:0C&stream=509828&extension=.m3u8",
-    // অন্য stream id এখানে যোগ করতে পারেন
-  };
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Stream fetch failed");
 
-  const url = streamMap[id];
-
-  if (!url) {
-    return res.status(404).send("Stream not found");
+    res.setHeader('Content-Type', 'video/MP2T');
+    response.body.pipe(res);
+  } catch (err) {
+    res.status(500).send("Stream proxy error");
   }
-
-  // মূল স্ট্রিমে রিডাইরেক্ট করুন
-  res.redirect(url);
 }
