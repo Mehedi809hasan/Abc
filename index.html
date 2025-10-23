@@ -1,1 +1,67 @@
 
+u<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTV Player</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col h-screen">
+
+  <!-- Video Player -->
+  <div class="w-full bg-black aspect-video">
+    <video id="player" controls autoplay class="w-full h-full bg-black"></video>
+  </div>
+
+  <!-- Channel List -->
+  <div id="channelList" class="overflow-y-auto flex-1 p-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"></div>
+
+  <script>
+    // 🔹 তোমার M3U ফাইলের লিংক এখানে দাও
+    const m3uUrl = https://raw.githubusercontent.com/abusaeeidx/Ayna-Playlists-free-Version/refs/heads/main/playlist.m3u";
+
+    const player =documentt.getElementById("player");
+    const channelList = document.getElementById("channelList");
+
+    // M3U ফাইল লোড
+    async function loadM3U() {
+      const res = await fetch(m3uUrl);
+      const text = await res.text();
+
+      const lines = text.split("\n");
+      let channels = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith("#EXTINF")) {
+          const titleMatch = lines[i].match(/,([^,]+)$/);
+          const title = titleMatch ? titleMatch[1].trim() : "Unknown Channel";
+          const url = lines[i + 1] ? lines[i + 1].trim() : null;
+          if (url && url.startsWith("http")) {
+            channels.push({ title, url });
+          }
+        }
+      }
+
+      displayChannels(channels);
+    }
+
+    // চ্যানেলগুলো দেখানো
+    function displayChannels(channels) {
+      channelList.innerHTML = "";
+      channels.forEach(ch => {
+        const div = document.createElement("div");
+        div.className = "bg-gray-800 rounded-xl p-2 text-center cursor-pointer hover:bg-gray-700";
+        div.innerText = ch.title;
+        div.onclick = () => {
+          player.src = ch.url;
+          player.play();
+        };
+        channelList.appendChild(div);
+      });
+    }
+
+    loadM3U();
+  </script>
+</body>
+</html>
